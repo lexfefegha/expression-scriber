@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expression-Scriber</title>
+  <link rel="stylesheet" href="/src/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Hub -->
+    <div id="hub" class="view">
+      <header class="hub-header">
+        <h1 class="hub-title">Expression-Scriber</h1>
+        <p class="hub-subtitle">A kind of instrument into which you can step & sit or sprawl or hang & use not only your fingers to make words express feelings but elbows, feet, head.</p>
+        <p class="hub-attribution">— after Amiri Baraka, <em>Technology & Ethos</em></p>
+      </header>
+      <div class="card-grid">
+        <button class="sketch-card" data-sketch="text-trailer">
+          <div class="card-icon">〰</div>
+          <h2>Movement Script</h2>
+          <p>Your body writes — words trail behind your motion, fading like breath on glass.</p>
+        </button>
+        <button class="sketch-card" data-sketch="body-transcriber">
+          <div class="card-icon">◎</div>
+          <h2>Spoken Body</h2>
+          <p>Voice becomes form — speak and your words appear on your skin in real-time.</p>
+        </button>
+        <button class="sketch-card" data-sketch="collage-creator">
+          <div class="card-icon">❏</div>
+          <h2>Worn Image</h2>
+          <p>Dress your limbs in pictures — upload images that move when you move.</p>
+        </button>
+      </div>
+      <footer class="hub-footer">
+        <p>Everything runs locally. Nothing leaves your machine.</p>
+      </footer>
+    </div>
+
+    <!-- Sketch view -->
+    <div id="sketch-view" class="view" style="display:none;">
+      <div class="sketch-layout">
+        <div class="canvas-area">
+          <div id="loading-overlay" class="loading-overlay">
+            <span id="loading-pct" class="loading-pct">0%</span>
+            <p id="loading-label" class="loading-label">Initializing…</p>
+          </div>
+          <canvas id="output-canvas"></canvas>
+          <video id="video" playsinline style="display:none;"></video>
+          <canvas id="webcam-preview" class="webcam-preview"></canvas>
+        </div>
+        <aside id="control-panel" class="control-panel">
+          <button id="back-btn" class="back-btn">← Back</button>
+          <h2 id="sketch-title" class="panel-title"></h2>
+          <div id="controls"></div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
