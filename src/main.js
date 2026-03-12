@@ -2,6 +2,7 @@ import PoseEngine from './pose-engine.js';
 import { createTextTrailer } from './sketches/text-trailer.js';
 import { createBodyTranscriber } from './sketches/body-transcriber.js';
 import { createCollageCreator } from './sketches/collage-creator.js';
+import { createFeltSound } from './sketches/felt-sound.js';
 
 const hub = document.getElementById('hub');
 const sketchView = document.getElementById('sketch-view');
@@ -21,6 +22,7 @@ const sketches = {
   'text-trailer': { title: 'Movement Script', factory: createTextTrailer },
   'body-transcriber': { title: 'Spoken Body', factory: createBodyTranscriber },
   'collage-creator': { title: 'Worn Image', factory: createCollageCreator },
+  'felt-sound': { title: 'Felt Sound', factory: createFeltSound },
 };
 
 // ─── Camera ───

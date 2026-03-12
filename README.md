@@ -4,7 +4,7 @@
 >
 > — Amiri Baraka, *Technology & Ethos* (1970)
 
-Your body is the input. Movement becomes expression. Three creative tools powered by AI pose detection, running entirely in your browser.
+Your body is the input. Movement becomes expression. Four creative tools powered by AI pose detection, running entirely in your browser.
 
 ## The Instruments
 
@@ -13,6 +13,8 @@ Your body is the input. Movement becomes expression. Three creative tools powere
 **◎ Spoken Body** — Voice becomes form. Speak aloud and your words appear on your skin in real-time, wrapping between your shoulders and around your head.
 
 **❏ Worn Image** — Dress your limbs in pictures. Upload images that map onto your body parts — head, torso, arms, legs — and move when you move.
+
+**◍ Felt Sound** — Your body becomes a synthesizer. Raise your right hand to shift pitch, spread your arms for volume, lift your left hand to brighten the timbre, tilt your shoulders to detune. The sound you make is visualized through and around your body in real-time.
 
 ## How It Works
 
@@ -41,6 +43,7 @@ npm run build
 - [TensorFlow.js](https://www.tensorflow.org/js) with MoveNet (SINGLEPOSE_LIGHTNING)
 - [Vite](https://vite.dev)
 - Web Speech API (for Spoken Body)
+- Web Audio API (for Felt Sound)
 
 ## Inspiration
 

@@ -72,7 +72,7 @@ h1, h2, h3 {
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(3, 260px);
+  grid-template-columns: repeat(2, 260px);
   gap: 16px;
 }
 
