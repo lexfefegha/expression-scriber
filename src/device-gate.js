@@ -7,15 +7,28 @@
   var gate = null;
 
   function isBlocked() {
-    var mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
+    var ua = navigator.userAgent || '';
+    var platform = navigator.platform || '';
+    var maxTP = navigator.maxTouchPoints || 0;
+
+    // UA-based mobile detection (covers most phones)
+    var mobileUA = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|CriOS|FxiOS/i.test(ua);
+
+    // iPad detection: iPadOS 13+ disguises itself as Mac in the UA string,
+    // but exposes touch points and a Macintosh platform
+    var iPad = /Macintosh/i.test(ua) && maxTP > 1;
+    // Also catch older iPads that still include "iPad" in the UA
+    iPad = iPad || /iPad/i.test(ua);
+
+    // Viewport too small for the experience
     var small = window.innerWidth < 900 || window.innerHeight < 500;
-    var touchOnly =
-      'ontouchstart' in window &&
-      navigator.maxTouchPoints > 0 &&
-      !window.matchMedia('(pointer: fine)').matches;
-    return mobile || small || touchOnly;
+
+    // Primary input is touch (coarse pointer) — catches devices the UA check misses.
+    // pointer:coarse is the most reliable signal for "no mouse attached".
+    var coarseOnly = window.matchMedia('(pointer: coarse)').matches &&
+                     !window.matchMedia('(any-pointer: fine)').matches;
+
+    return mobileUA || iPad || small || coarseOnly;
   }
 
   function createGate() {
