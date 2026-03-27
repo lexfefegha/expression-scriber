@@ -312,7 +312,7 @@ async function openSketch(name) {
 
     activeSketch = def.factory(poseEngine, controlsContainer);
     if (activeSketch.setup) {
-      activeSketch.setup(outputCanvas, video, vw, vh);
+      await activeSketch.setup(outputCanvas, video, vw, vh);
     }
 
     recorder = createRecorder(outputCanvas, videoEl);

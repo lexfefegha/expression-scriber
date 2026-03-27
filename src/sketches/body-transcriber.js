@@ -15,6 +15,43 @@ export function createBodyTranscriber(poseEngine, controlsEl) {
   let text = '';
   let recognition = null;
 
+  // ─── Mic audio (for recording the spoken voice into the MP4) ───
+  let audioCtx = null;
+  let micStream = null;
+  let micSource = null;
+  let analyser = null;
+
+  async function initMicAudio() {
+    try {
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      micSource = audioCtx.createMediaStreamSource(micStream);
+
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
+
+      // Route: mic -> analyser (no destination — avoids speaker feedback;
+      // the recorder connects its own MediaStreamDestination to this graph)
+      micSource.connect(analyser);
+    } catch (err) {
+      console.warn('Mic audio init failed (recording will be silent):', err);
+      audioCtx = null;
+      micStream = null;
+      micSource = null;
+      analyser = null;
+    }
+  }
+
+  function destroyMicAudio() {
+    if (micSource) { try { micSource.disconnect(); } catch (_) { /* ignore */ } }
+    if (micStream) { micStream.getTracks().forEach((t) => t.stop()); }
+    if (audioCtx) { try { audioCtx.close(); } catch (_) { /* ignore */ } }
+    audioCtx = null;
+    micStream = null;
+    micSource = null;
+    analyser = null;
+  }
+
   // ─── Speech Recognition ───
   function startSpeech() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -34,7 +71,6 @@ export function createBodyTranscriber(poseEngine, controlsEl) {
     };
 
     recognition.onend = () => {
-      // Auto-restart if still active
       try { recognition.start(); } catch (_) { /* ignore */ }
     };
 
@@ -139,8 +175,11 @@ export function createBodyTranscriber(poseEngine, controlsEl) {
   return {
     state,
     draw,
-    setup() {
+    getAudioContext() { return audioCtx; },
+    getAnalyserNode() { return analyser; },
+    async setup() {
       startSpeech();
+      await initMicAudio();
     },
     destroy() {
       if (recognition) {
@@ -148,6 +187,7 @@ export function createBodyTranscriber(poseEngine, controlsEl) {
         recognition = null;
       }
       text = '';
+      destroyMicAudio();
     },
   };
 }
