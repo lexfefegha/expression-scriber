@@ -8,13 +8,13 @@ Your body is the input. Movement becomes expression. Four creative tools powered
 
 ## The Instruments
 
-**〰 Movement Script** — Your body writes. Words trail behind your motion, fading like breath on glass. Choose your text, font, colors, and trail behavior.
+**〰 Movement Script** — Your body writes. Words trail behind your motion, fading like breath on glass. Two modes: *trail* (text follows you like a comet tail) and *paint* (text stamps in place and dissolves). Choose which keypoints to track, your text, font, colors, and trail behavior.
 
 **◎ Spoken Body** — Voice becomes form. Speak aloud and your words appear on your skin in real-time, wrapping between your shoulders and around your head.
 
-**❏ Worn Image** — Dress your limbs in pictures. Upload images that map onto your body parts — head, torso, arms, legs — and move when you move.
+**❏ Worn Image** — Dress your limbs in emoji. Pick a character for each body part — head, torso, upper arms, forearms, thighs, shins — from a palette of 50 emoji and watch them move with you.
 
-**◍ Felt Sound** — Your body becomes a synthesizer. Raise your right hand to shift pitch, spread your arms for volume, lift your left hand to brighten the timbre, tilt your shoulders to detune. The sound you make is visualized through and around your body in real-time.
+**◍ Felt Sound** — Your body becomes a synthesizer. Raise your right hand to shift pitch, spread your arms for volume, lift your left hand to brighten the timbre, tilt your shoulders to detune. Pick a base note, waveform shape, and reverb amount. Three visualization styles: waveform, spectrum bars, and expanding rings.
 
 ## How It Works
 

@@ -1,7 +1,8 @@
 import {
-  makeCtrlGroup, addColorPicker, addSlider, addTextInput,
-  addSelect, addToggle,
+  makeCtrlGroup, addSlider, addTextInput,
+  addSelect, addToggle, addColorPicker,
 } from '../main.js';
+import { drawDebugOverlay } from '../debug-overlay.js';
 
 const ALL_PARTS = [
   'nose', 'leftEye', 'rightEye', 'leftEar', 'rightEar',
@@ -12,26 +13,19 @@ const ALL_PARTS = [
 
 export function createTextTrailer(poseEngine, controlsEl) {
   const state = {
-    backgroundColor: '#ff4490',
-    showVideo: false,
+    backgroundColor: '#1a1a2e',
     showWebcamPreview: true,
+    debugOverlay: false,
     visual: 'trail',
     text: {
       words: 'move',
-      color: '#0030cd',
+      color: '#ff6b8a',
       font: 'Space Grotesk',
-      alignment: 'center',
       size: 70,
-      showText: true,
       wordOptions: 'repeat',
       splitOptions: 'word',
-      reverseOrder: false,
     },
     keypoints: {
-      showPoints: false,
-      color: '#c8434b',
-      pointsStyle: 'fill',
-      pointSize: 5,
       enabled: {
         nose: true,
         leftEye: false, rightEye: false,
@@ -44,7 +38,7 @@ export function createTextTrailer(poseEngine, controlsEl) {
         leftAnkle: false, rightAnkle: false,
       },
     },
-    trail: { numberOfPastPoses: 15, poseOffsetX: 10, poseOffsetY: 2 },
+    trail: { numberOfPastPoses: 15 },
     paint: { lifeSpan: 25 },
   };
 
@@ -61,26 +55,18 @@ export function createTextTrailer(poseEngine, controlsEl) {
     pastPoses = [];
     pastPaintedPoses = [];
   });
-  addToggle(gGeneral, 'Show video', state.showVideo, (v) => { state.showVideo = v; });
   addToggle(gGeneral, 'Webcam preview', state.showWebcamPreview, (v) => { state.showWebcamPreview = v; });
+  addToggle(gGeneral, 'Debug overlay', state.debugOverlay, (v) => { state.debugOverlay = v; });
 
   const gText = makeCtrlGroup(controlsEl, 'Text');
-  addToggle(gText, 'Show text', state.text.showText, (v) => { state.text.showText = v; });
   addTextInput(gText, 'Words', state.text.words, (v) => { state.text.words = v; });
   addColorPicker(gText, 'Color', state.text.color, (v) => { state.text.color = v; });
   addSelect(gText, 'Font', ['Space Grotesk', 'Times New Roman', 'Arial', 'Georgia', 'Courier New'], state.text.font, (v) => { state.text.font = v; });
-  addSelect(gText, 'Align', ['center', 'left', 'right'], state.text.alignment, (v) => { state.text.alignment = v; });
   addSlider(gText, 'Size', 10, 300, 1, state.text.size, (v) => { state.text.size = v; });
   addSelect(gText, 'Word mode', ['repeat', 'word by word'], state.text.wordOptions, (v) => { state.text.wordOptions = v; });
   addSelect(gText, 'Split by', ['word', 'character'], state.text.splitOptions, (v) => { state.text.splitOptions = v; });
-  addToggle(gText, 'Reverse order', state.text.reverseOrder, (v) => { state.text.reverseOrder = v; });
 
-  const gKp = makeCtrlGroup(controlsEl, 'Keypoints');
-  addToggle(gKp, 'Show points', state.keypoints.showPoints, (v) => { state.keypoints.showPoints = v; });
-  addColorPicker(gKp, 'Color', state.keypoints.color, (v) => { state.keypoints.color = v; });
-  addSelect(gKp, 'Style', ['fill', 'outline'], state.keypoints.pointsStyle, (v) => { state.keypoints.pointsStyle = v; });
-  addSlider(gKp, 'Size', 1, 100, 1, state.keypoints.pointSize, (v) => { state.keypoints.pointSize = v; });
-
+  const gAttach = makeCtrlGroup(controlsEl, 'Attach to');
   const kpDiv = document.createElement('div');
   kpDiv.className = 'kp-grid';
   ALL_PARTS.forEach((part) => {
@@ -93,37 +79,18 @@ export function createTextTrailer(poseEngine, controlsEl) {
     lbl.appendChild(document.createTextNode(' ' + part));
     kpDiv.appendChild(lbl);
   });
-  gKp.appendChild(kpDiv);
+  gAttach.appendChild(kpDiv);
 
   const gTrail = makeCtrlGroup(controlsEl, 'Trail settings');
-  addSlider(gTrail, 'Past poses', 1, 50, 1, state.trail.numberOfPastPoses, (v) => { state.trail.numberOfPastPoses = v; });
-  addSlider(gTrail, 'Offset X', -100, 100, 1, state.trail.poseOffsetX, (v) => { state.trail.poseOffsetX = v; });
-  addSlider(gTrail, 'Offset Y', -100, 100, 1, state.trail.poseOffsetY, (v) => { state.trail.poseOffsetY = v; });
+  addSlider(gTrail, 'Trail length', 1, 50, 1, state.trail.numberOfPastPoses, (v) => { state.trail.numberOfPastPoses = v; });
 
   const gPaint = makeCtrlGroup(controlsEl, 'Paint settings');
-  addSlider(gPaint, 'Life span', 1, 200, 1, state.paint.lifeSpan, (v) => { state.paint.lifeSpan = v; });
+  addSlider(gPaint, 'Fade speed', 1, 200, 1, state.paint.lifeSpan, (v) => { state.paint.lifeSpan = v; });
 
   // ─── Drawing helpers ───
   function hexToRgb(hex) {
     const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return r ? { r: parseInt(r[1], 16), g: parseInt(r[2], 16), b: parseInt(r[3], 16) } : { r: 0, g: 0, b: 0 };
-  }
-
-  function drawPoint(ctx, x, y, r, color) {
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.strokeStyle = color;
-    if (state.keypoints.pointsStyle === 'fill') ctx.fill();
-    else ctx.stroke();
-  }
-
-  function drawKeypointsColored(keypoints, color, minConf, ctx) {
-    for (const kp of keypoints) {
-      if (kp.score < minConf) continue;
-      if (!state.keypoints.enabled[kp.part]) continue;
-      drawPoint(ctx, kp.position.x, kp.position.y, state.keypoints.pointSize, color);
-    }
   }
 
   function drawTextsOnKeypoints(text, textOpts, keypoints, color, minConf, ctx) {
@@ -132,7 +99,7 @@ export function createTextTrailer(poseEngine, controlsEl) {
       if (!state.keypoints.enabled[kp.part]) continue;
       ctx.font = textOpts.size + 'px ' + textOpts.font;
       ctx.fillStyle = color;
-      ctx.textAlign = textOpts.alignment;
+      ctx.textAlign = 'center';
       ctx.fillText(text, kp.position.x, kp.position.y);
     }
   }
@@ -144,10 +111,9 @@ export function createTextTrailer(poseEngine, controlsEl) {
 
   // ─── Painted pose class ───
   class PaintedPose {
-    constructor(pose, minConf, color, text) {
+    constructor(pose, minConf, text) {
       this.keypoints = pose.keypoints;
       this.score = pose.score;
-      this.color = color;
       this.text = text;
       this.startLife = state.paint.lifeSpan;
       this.lifeSpan = this.startLife;
@@ -157,28 +123,20 @@ export function createTextTrailer(poseEngine, controlsEl) {
     display(ctx) {
       this.lifeSpan--;
       const alpha = this.lifeSpan / this.startLife;
-      const c = hexToRgb(this.color);
-      const cs = `rgba(${c.r},${c.g},${c.b},${alpha})`;
       const tc = hexToRgb(state.text.color);
       const ts = `rgba(${tc.r},${tc.g},${tc.b},${alpha})`;
-      if (state.keypoints.showPoints) drawKeypointsColored(this.keypoints, cs, this.minConf, ctx);
-      if (state.text.showText) drawTextsOnKeypoints(this.text, state.text, this.keypoints, ts, this.minConf, ctx);
+      drawTextsOnKeypoints(this.text, state.text, this.keypoints, ts, this.minConf, ctx);
     }
   }
+
+  const TRAIL_OFFSET_X = 10;
+  const TRAIL_OFFSET_Y = 2;
 
   // ─── Main draw ───
   function draw(ctx, canvas, poses, video) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = state.backgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    if (state.showVideo) {
-      ctx.save();
-      ctx.scale(-1, 1);
-      ctx.translate(-canvas.width, 0);
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      ctx.restore();
-    }
 
     const minConf = 0.3;
     const pose = poses[0];
@@ -187,33 +145,27 @@ export function createTextTrailer(poseEngine, controlsEl) {
     const allWords = splitWords();
 
     if (state.visual === 'trail') {
-      let wordIndex = state.text.reverseOrder ? allWords.length - 1 : 0;
+      let wordIndex = 0;
 
       for (let p = 0; p < pastPoses.length; p++) {
         const past = pastPoses[p];
         const alpha = (pastPoses.length - p) / pastPoses.length;
-        const kc = hexToRgb(state.keypoints.color);
-        const kcStr = `rgba(${kc.r},${kc.g},${kc.b},${alpha})`;
         const tc = hexToRgb(state.text.color);
         const tcStr = `rgba(${tc.r},${tc.g},${tc.b},${alpha})`;
 
         ctx.save();
-        ctx.translate(p * state.trail.poseOffsetX, p * state.trail.poseOffsetY);
+        ctx.translate(p * TRAIL_OFFSET_X, p * TRAIL_OFFSET_Y);
         ctx.scale(alpha, alpha);
 
         if (past.score >= minConf) {
-          if (state.keypoints.showPoints) drawKeypointsColored(past.keypoints, kcStr, minConf, ctx);
-
-          if (state.text.showText) {
-            let textToShow;
-            if (state.text.wordOptions === 'repeat') {
-              textToShow = state.text.words;
-            } else {
-              textToShow = allWords[((wordIndex % allWords.length) + allWords.length) % allWords.length];
-              wordIndex += state.text.reverseOrder ? -1 : 1;
-            }
-            drawTextsOnKeypoints(textToShow, state.text, past.keypoints, tcStr, minConf, ctx);
+          let textToShow;
+          if (state.text.wordOptions === 'repeat') {
+            textToShow = state.text.words;
+          } else {
+            textToShow = allWords[((wordIndex % allWords.length) + allWords.length) % allWords.length];
+            wordIndex++;
           }
+          drawTextsOnKeypoints(textToShow, state.text, past.keypoints, tcStr, minConf, ctx);
         }
         ctx.restore();
       }
@@ -232,10 +184,15 @@ export function createTextTrailer(poseEngine, controlsEl) {
         textToShow = state.text.words;
       } else {
         textToShow = allWords[((paintedWordIndex % allWords.length) + allWords.length) % allWords.length];
-        paintedWordIndex += state.text.reverseOrder ? -1 : 1;
+        paintedWordIndex++;
       }
 
-      pastPaintedPoses.push(new PaintedPose(pose, minConf, state.keypoints.color, textToShow));
+      pastPaintedPoses.push(new PaintedPose(pose, minConf, textToShow));
+    }
+
+    if (state.debugOverlay && pose) {
+      const trackedParts = ALL_PARTS.filter(p => state.keypoints.enabled[p]);
+      drawDebugOverlay(ctx, pose, { trackedParts });
     }
   }
 

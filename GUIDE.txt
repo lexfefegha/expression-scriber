@@ -1,0 +1,101 @@
+EXPRESSION-SCRIBER — HOW TO USE
+================================
+
+Your body is the controller. Move in front of your webcam
+and four creative tools turn your movement into art and sound.
+
+Everything runs in your browser. Nothing is sent anywhere.
+
+
+GETTING STARTED
+---------------
+
+1. Open the app in Chrome or Edge on a laptop/desktop.
+   (Mobile is not supported — you need a keyboard and a webcam.)
+
+2. Allow camera access when your browser asks.
+
+3. You'll see four cards on the home screen. Click one to start.
+
+4. Stand so your full upper body (at least) is visible to the camera.
+   A small webcam preview in the corner shows what the camera sees.
+
+5. Wait a few seconds for the pose model to load (you'll see a percentage).
+
+6. Start moving. The main canvas shows the result in real time.
+
+
+THE FOUR INSTRUMENTS
+--------------------
+
+MOVEMENT SCRIPT  〰
+  Your body writes. Words follow your motion and fade away.
+  Two modes:
+    Trail  — text follows you and fades behind like a comet tail.
+             You control the trail length.
+    Paint  — text stamps where you are and slowly dissolves.
+             You control how fast it fades.
+  Pick which body parts the text attaches to (nose, wrists,
+  elbows, shoulders, etc.). Change the text, font, color, size,
+  and whether words repeat or cycle one by one.
+
+SPOKEN BODY  ◎
+  Speak out loud. Your words appear on your body in real time,
+  wrapping between your shoulders and around your head. The browser
+  uses your microphone for speech recognition — allow mic access
+  when asked. You can change text color and size.
+
+WORN IMAGE  ❏
+  Pick an emoji for each body part — head, torso, upper arms,
+  forearms, thighs, shins. The emoji sticks to your limbs and
+  moves when you move. Choose from a palette of 50 emoji. Each
+  body part gets its own dropdown so you can mix and match.
+
+FELT SOUND  ◍
+  Your body becomes a musical instrument.
+    - Raise your RIGHT hand  → pitch goes up
+    - Spread your arms wide  → volume goes up
+    - Raise your LEFT hand   → sound gets brighter
+    - Tilt your shoulders    → detune / wobble effect
+  Controls let you pick a base note (C2 through C5), waveform
+  shape (sawtooth, triangle, sine, square), and reverb amount.
+  Three visualization styles:
+    Waveform  — a sound wave drawn across your body
+    Spectrum  — frequency bars centered on your torso
+    Rings     — expanding circles at your wrists and shoulders
+  Click the canvas once if you don't hear sound (browsers block
+  audio until you interact with the page). Use the Mute toggle
+  to silence audio without leaving the sketch.
+
+
+THE CONTROL PANEL
+-----------------
+
+Every instrument has a panel on the right side of the screen.
+Use it to tweak colors, fonts, sizes, emojis, and behavior
+without writing any code.
+
+  ← Back     Returns to the home screen.
+  ● Rec      Records a video of your canvas. Click once to start
+             recording, click again to stop. The video downloads
+             automatically as a .webm file.
+
+Each instrument also has:
+  Background     — change the canvas background color.
+  Webcam preview — toggle the small camera feed on or off.
+  Debug overlay  — show keypoint names, confidence scores,
+                   and tracked-part highlights (useful for
+                   understanding what the pose model sees).
+
+
+TIPS
+----
+
+- Good lighting helps the camera see you better.
+- Stand about 3–6 feet from the camera.
+- A plain background behind you works best.
+- If tracking is jumpy, try moving more slowly.
+- You can resize the browser window — the canvas adapts.
+- Turn on the debug overlay to see exactly which keypoints
+  are being tracked and how confident the model is.
+

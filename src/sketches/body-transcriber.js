@@ -1,20 +1,15 @@
 import {
-  makeCtrlGroup, addColorPicker, addSlider, addToggle, addSelect,
+  makeCtrlGroup, addColorPicker, addSlider, addToggle,
 } from '../main.js';
+import { drawDebugOverlay } from '../debug-overlay.js';
 
 export function createBodyTranscriber(poseEngine, controlsEl) {
   const state = {
-    backgroundColor: '#ffe053',
-    textColor: '#9d005c',
+    backgroundColor: '#0d1b2a',
+    textColor: '#e0e0e0',
     textSize: 18,
-    showVideo: false,
     showWebcamPreview: true,
-    keypoints: {
-      showPoints: true,
-      pointsColor: '#9d005c',
-      pointsStyle: 'outline',
-      pointSize: 5,
-    },
+    debugOverlay: false,
   };
 
   let text = '';
@@ -49,39 +44,26 @@ export function createBodyTranscriber(poseEngine, controlsEl) {
   // ─── Build controls ───
   const gGeneral = makeCtrlGroup(controlsEl, 'General');
   addColorPicker(gGeneral, 'Background', state.backgroundColor, (v) => { state.backgroundColor = v; });
-  addToggle(gGeneral, 'Show video', state.showVideo, (v) => { state.showVideo = v; });
   addToggle(gGeneral, 'Webcam preview', state.showWebcamPreview, (v) => { state.showWebcamPreview = v; });
+  addToggle(gGeneral, 'Debug overlay', state.debugOverlay, (v) => { state.debugOverlay = v; });
 
   const gText = makeCtrlGroup(controlsEl, 'Text');
   addColorPicker(gText, 'Text color', state.textColor, (v) => { state.textColor = v; });
   addSlider(gText, 'Text size', 10, 60, 1, state.textSize, (v) => { state.textSize = v; });
 
-  // Instruction note
   const note = document.createElement('div');
   note.style.cssText = 'font-size:0.8rem;color:var(--text-dim);margin-top:8px;line-height:1.4;';
   note.textContent = 'Speak aloud — your words will appear on your body. Make sure to allow microphone access.';
   gText.appendChild(note);
 
-  const gKp = makeCtrlGroup(controlsEl, 'Keypoints');
-  addToggle(gKp, 'Show points', state.keypoints.showPoints, (v) => { state.keypoints.showPoints = v; });
-  addColorPicker(gKp, 'Color', state.keypoints.pointsColor, (v) => { state.keypoints.pointsColor = v; });
-  addSelect(gKp, 'Style', ['fill', 'outline'], state.keypoints.pointsStyle, (v) => { state.keypoints.pointsStyle = v; });
-  addSlider(gKp, 'Size', 1, 100, 1, state.keypoints.pointSize, (v) => { state.keypoints.pointSize = v; });
-
   // ─── Drawing helpers ───
-  function drawPoint(ctx, x, y, r, color) {
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.strokeStyle = color;
-    if (state.keypoints.pointsStyle === 'fill') ctx.fill();
-    else ctx.stroke();
-  }
-
   function drawKeypoints(keypoints, minConf, ctx) {
+    ctx.fillStyle = 'rgba(224, 224, 224, 0.6)';
     for (const kp of keypoints) {
       if (kp.score < minConf) continue;
-      drawPoint(ctx, kp.position.x, kp.position.y, state.keypoints.pointSize, state.keypoints.pointsColor);
+      ctx.beginPath();
+      ctx.arc(kp.position.x, kp.position.y, 4, 0, Math.PI * 2);
+      ctx.fill();
     }
   }
 
@@ -122,15 +104,6 @@ export function createBodyTranscriber(poseEngine, controlsEl) {
     ctx.fillStyle = state.backgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    if (state.showVideo) {
-      ctx.save();
-      ctx.scale(-1, 1);
-      ctx.translate(-canvas.width, 0);
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      ctx.restore();
-    }
-
-    // Instruction text
     ctx.textAlign = 'left';
     ctx.fillStyle = state.textColor;
     ctx.font = '18px Space Grotesk';
@@ -140,9 +113,7 @@ export function createBodyTranscriber(poseEngine, controlsEl) {
     const pose = poses[0];
     if (!pose) return;
 
-    if (state.keypoints.showPoints) {
-      drawKeypoints(pose.keypoints, minConf, ctx);
-    }
+    drawKeypoints(pose.keypoints, minConf, ctx);
 
     // Draw text on torso (between shoulders)
     const ls = pose.parts.leftShoulder;
@@ -156,6 +127,12 @@ export function createBodyTranscriber(poseEngine, controlsEl) {
     const re = pose.parts.rightEar;
     if (le && re && le.score > minConf && re.score > minConf) {
       drawTextRegion(ctx, text, le.position, re.position);
+    }
+
+    if (state.debugOverlay) {
+      drawDebugOverlay(ctx, pose, {
+        trackedParts: ['leftShoulder', 'rightShoulder', 'leftEar', 'rightEar'],
+      });
     }
   }
 

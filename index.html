@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate">
   <title>Expression-Scriber</title>
   <link rel="stylesheet" href="/src/styles.css" />
 </head>
@@ -14,6 +15,7 @@
         <h1 class="hub-title">Expression-Scriber</h1>
         <p class="hub-subtitle">A kind of instrument into which you can step & sit or sprawl or hang & use not only your fingers to make words express feelings but elbows, feet, head.</p>
         <p class="hub-attribution">— after Amiri Baraka, <em>Technology & Ethos</em></p>
+        <p class="hub-attribution">Inspired also by PoseNet Sketchbook</p>
       </header>
       <div class="card-grid">
         <button class="sketch-card" data-sketch="text-trailer">
@@ -29,7 +31,7 @@
         <button class="sketch-card" data-sketch="collage-creator">
           <div class="card-icon">❏</div>
           <h2>Worn Image</h2>
-          <p>Dress your limbs in pictures — upload images that move when you move.</p>
+          <p>Dress your limbs in emoji — pick a character for each body part and watch them move with you.</p>
         </button>
         <button class="sketch-card" data-sketch="felt-sound">
           <div class="card-icon">◍</div>
@@ -53,9 +55,17 @@
           <canvas id="output-canvas"></canvas>
           <video id="video" playsinline style="display:none;"></video>
           <canvas id="webcam-preview" class="webcam-preview"></canvas>
+          <!-- Recording status overlay (inside canvas-area for absolute positioning) -->
+          <div id="rec-indicator" class="rec-indicator" style="display:none;">
+            <span class="rec-dot"></span>
+            <span id="rec-timer" class="rec-timer">0:00</span>
+          </div>
         </div>
         <aside id="control-panel" class="control-panel">
-          <button id="back-btn" class="back-btn">← Back</button>
+          <div class="panel-top-row">
+            <button id="back-btn" class="back-btn">← Back</button>
+            <button id="record-btn" class="record-btn">● Rec</button>
+          </div>
           <h2 id="sketch-title" class="panel-title"></h2>
           <div id="controls"></div>
         </aside>
@@ -63,6 +73,7 @@
     </div>
   </div>
 
+  <script src="/src/device-gate.js"></script>
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>

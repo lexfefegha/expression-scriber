@@ -147,11 +147,12 @@ h1, h2, h3 {
   position: absolute;
   bottom: 12px;
   left: 12px;
-  width: 160px;
+  width: 240px;
   border-radius: var(--radius);
-  border: 1px solid var(--glass-border);
-  opacity: 0.85;
+  border: 2px solid var(--glass-border);
+  opacity: 0.9;
   z-index: 10;
+  transition: border-color 0.4s ease;
 }
 
 .loading-overlay {
@@ -306,7 +307,13 @@ h1, h2, h3 {
   font-size: 0.85rem;
   max-width: 170px;
   cursor: pointer;
-  appearance: none;
+}
+
+.ctrl-row select.emoji-select {
+  font-size: 1.3rem;
+  max-width: 70px;
+  text-align: center;
+  padding: 4px 8px;
 }
 
 .ctrl-row select option {
@@ -360,27 +367,6 @@ h1, h2, h3 {
   background: var(--bg-dark);
 }
 
-/* File upload button */
-.upload-btn {
-  background: var(--glass);
-  border: 1px dashed var(--glass-border);
-  border-radius: var(--radius);
-  padding: 8px 14px;
-  color: var(--text);
-  font-size: 0.8rem;
-  cursor: pointer;
-  font-family: inherit;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  transition: background 0.15s;
-}
-
-.upload-btn:hover {
-  background: var(--glass-hover);
-}
-
-.upload-btn input[type="file"] { display: none; }
 
 /* Keypoint checkboxes */
 .kp-grid {
@@ -420,4 +406,166 @@ h1, h2, h3 {
   min-width: 30px;
   text-align: right;
   font-weight: 600;
+}
+
+/* ─── Panel top row ─── */
+.panel-top-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.panel-top-row .back-btn {
+  margin-bottom: 0;
+}
+
+/* ─── Record Button ─── */
+.record-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 8px 16px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: background 0.15s, border-color 0.3s, color 0.3s;
+}
+.record-btn:hover { background: var(--glass-hover); }
+.record-btn:active { transform: scale(0.98); }
+
+.record-btn.recording {
+  color: var(--error);
+  border-color: var(--error);
+  animation: pulse-rec 1.4s ease infinite;
+}
+
+@keyframes pulse-rec {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.45); }
+  50%      { box-shadow: 0 0 0 7px rgba(255, 107, 107, 0); }
+}
+
+/* ─── Recording indicator on canvas ─── */
+.rec-indicator {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 20px;
+  padding: 5px 12px 5px 9px;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.rec-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--error);
+  animation: blink-dot 1s step-start infinite;
+}
+
+@keyframes blink-dot {
+  50% { opacity: 0; }
+}
+
+.rec-timer {
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+
+/* ─── Transcode overlay ─── */
+.transcode-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(42, 36, 163, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 110;
+}
+
+.transcode-card {
+  text-align: center;
+  max-width: 320px;
+}
+
+.transcode-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.transcode-bar-track {
+  width: 260px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.transcode-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.transcode-status {
+  margin-top: 12px;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ─── Device Gate ─── */
+#device-gate {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 32px;
+  z-index: 9999;
+}
+
+#device-gate .gate-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  opacity: 0.6;
+}
+
+#device-gate h1 {
+  font-size: 1.3rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+}
+
+#device-gate p {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  line-height: 1.7;
+  max-width: 380px;
+  margin-bottom: 8px;
 }

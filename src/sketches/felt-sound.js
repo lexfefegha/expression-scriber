@@ -1,6 +1,7 @@
 import {
   makeCtrlGroup, addColorPicker, addSlider, addSelect, addToggle,
 } from '../main.js';
+import { drawDebugOverlay } from '../debug-overlay.js';
 
 const NOTE_FREQS = {
   'C2': 65.41, 'D2': 73.42, 'E2': 82.41, 'F2': 87.31, 'G2': 98.00, 'A2': 110.00, 'B2': 123.47,
@@ -33,16 +34,17 @@ function hslToRgb(h, s, l) {
   return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
 }
 
+const PITCH_RANGE = 2;
+
 export function createFeltSound(poseEngine, controlsEl) {
   const state = {
     backgroundColor: '#0a0a1a',
     baseNote: 'C3',
-    pitchRange: 2,
     waveform: 'sawtooth',
     reverbMix: 0.3,
     visualStyle: 'waveform',
-    showKeypoints: true,
     showWebcamPreview: true,
+    debugOverlay: false,
     muted: false,
   };
 
@@ -126,7 +128,7 @@ export function createFeltSound(poseEngine, controlsEl) {
     const p = pose.parts;
     const minC = 0.3;
     const baseFreq = NOTE_FREQS[state.baseNote] || 130.81;
-    const maxFreq = baseFreq * Math.pow(2, state.pitchRange);
+    const maxFreq = baseFreq * Math.pow(2, PITCH_RANGE);
 
     // Pitch: right wrist Y (top of canvas = high, bottom = low)
     if (p.rightWrist && p.rightWrist.score > minC) {
@@ -176,13 +178,12 @@ export function createFeltSound(poseEngine, controlsEl) {
   // ─── Build controls ───
   const gGeneral = makeCtrlGroup(controlsEl, 'General');
   addColorPicker(gGeneral, 'Background', state.backgroundColor, (v) => { state.backgroundColor = v; });
-  addToggle(gGeneral, 'Show keypoints', state.showKeypoints, (v) => { state.showKeypoints = v; });
   addToggle(gGeneral, 'Webcam preview', state.showWebcamPreview, (v) => { state.showWebcamPreview = v; });
+  addToggle(gGeneral, 'Debug overlay', state.debugOverlay, (v) => { state.debugOverlay = v; });
   addToggle(gGeneral, 'Mute', state.muted, (v) => { state.muted = v; });
 
   const gSound = makeCtrlGroup(controlsEl, 'Sound');
   addSelect(gSound, 'Base note', Object.keys(NOTE_FREQS), state.baseNote, (v) => { state.baseNote = v; });
-  addSlider(gSound, 'Pitch range', 1, 4, 0.5, state.pitchRange, (v) => { state.pitchRange = v; });
   addSelect(gSound, 'Waveform', ['sawtooth', 'triangle', 'sine', 'square'], state.waveform, (v) => {
     state.waveform = v;
     if (osc1) osc1.type = v;
@@ -201,21 +202,9 @@ export function createFeltSound(poseEngine, controlsEl) {
   function getPitchHue() {
     if (!audioCtx) return 240;
     const baseFreq = NOTE_FREQS[state.baseNote] || 130.81;
-    const maxFreq = baseFreq * Math.pow(2, state.pitchRange);
+    const maxFreq = baseFreq * Math.pow(2, PITCH_RANGE);
     const norm = clamp((sFreq - baseFreq) / (maxFreq - baseFreq), 0, 1);
     return lerp(260, 180, norm); // deep blue/purple -> cyan
-  }
-
-  function drawKeypoints(ctx, keypoints, minConf) {
-    const hue = getPitchHue();
-    const alpha = clamp(sGain * 3, 0.2, 0.9);
-    for (const kp of keypoints) {
-      if (kp.score < minConf) continue;
-      ctx.beginPath();
-      ctx.arc(kp.position.x, kp.position.y, 4, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(${hue}, 80%, 70%, ${alpha})`;
-      ctx.fill();
-    }
   }
 
   function drawWaveformVis(ctx, canvas, pose) {
@@ -354,9 +343,16 @@ export function createFeltSound(poseEngine, controlsEl) {
       case 'rings':    drawRingsVis(ctx, canvas, pose); break;
     }
 
-    // Keypoints
-    if (state.showKeypoints && pose) {
-      drawKeypoints(ctx, pose.keypoints, 0.3);
+    if (state.debugOverlay && pose) {
+      drawDebugOverlay(ctx, pose, {
+        trackedParts: ['leftWrist', 'rightWrist', 'leftShoulder', 'rightShoulder'],
+        statusLines: {
+          pitch: Math.round(sFreq) + ' Hz',
+          volume: (sGain * 100).toFixed(0) + '%',
+          filter: Math.round(sFilter) + ' Hz',
+          detune: sDetune.toFixed(1) + ' ct',
+        },
+      });
     }
 
     // Prompt if audio is suspended
@@ -379,10 +375,10 @@ export function createFeltSound(poseEngine, controlsEl) {
   return {
     state,
     draw,
+    getAudioContext() { return audioCtx; },
+    getAnalyserNode() { return analyser; },
     setup(canvas) {
       initAudio();
-      // Browsers may still suspend AudioContext even after creation —
-      // a click/touch on the canvas will resume it as a fallback
       canvas.addEventListener('click', resumeOnGesture, { once: false });
       canvas.addEventListener('touchstart', resumeOnGesture, { once: false });
     },
