@@ -1,3 +1,4 @@
+import './device-gate.js';
 import PoseEngine, { Readiness } from './pose-engine.js';
 import { createGuideOverlay } from './guide-overlay.js';
 import { createTextTrailer } from './sketches/text-trailer.js';
